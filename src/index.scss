@@ -1,0 +1,40 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css");
+@import url("https://fonts.googleapis.com/css?family=Libre+Baskerville");
+
+body {
+  background: #f5f5f5;
+}
+
+h1 {
+  font: italic lighter 3.5em/1 'Libre Baskerville', serif;
+  text-align: center;
+  margin: 1em 0;
+}
+
+p {
+  font: italic lighter 1em/1 'Libre Baskerville', serif;
+  text-align: center;
+  margin: 0 0 3em;
+}
+
+#canvas-container {
+  width: 100%;
+  padding-top: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eaeaea;
+}
+
+#container {
+  margin: 0 25%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#footer {
+  margin: 2em 0;
+}
