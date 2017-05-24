@@ -2,13 +2,12 @@
 
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
   output: {
     path: __dirname + '/dist',
-    filename: '[hash].bundle.js'
+    filename: 'index.bundle.js'
   },
   module: {
     rules: [{
@@ -41,17 +40,8 @@ module.exports = {
       template: './src/index.html'
     }),
     new ExtractTextPlugin({
-      filename: '[contenthash].css',
+      filename: 'index.css',
       allChunks: true
     }),
-    new CleanWebpackPlugin(['dist'], {
-      root: __dirname,
-      verbose: false,
-      dry: false,
-      watch: true,
-      exclude: ['index.html']
-    })
-
-
   ]
 }

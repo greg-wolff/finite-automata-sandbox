@@ -21,18 +21,27 @@ p {
   width: 100%;
   padding-top: 100%;
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background-color: #eaeaea;
 }
 
+#canvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
 #container {
-  margin: 0 25%;
+  margin: 0 auto;
+  width: 700px;
   display: flex;
   flex-flow: column;
   align-items: center;
   justify-content: center;
+  @media screen and (max-device-width: 412px) {
+    width: 90%;
+  }
 }
 
 #footer {
