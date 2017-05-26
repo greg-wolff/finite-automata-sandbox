@@ -11,7 +11,7 @@ canvas.width = parent.offsetWidth
 canvas.height = parent.offsetHeight
 
 var stage = new createjs.Stage('canvas')
-createjs.Ticker.addEventListener("tick", tick);
+createjs.Ticker.addEventListener('tick', tick)
 
 /* var point = new createjs.Shape()
 point.graphics.ss(3).s('#ccc').dc(0, 0, 30)
@@ -52,47 +52,65 @@ function handleMove(e) {
   })
 }
 
-function drawLine(e) {
-  var hanging = true
+function findState() {
+  var state
   var states = stage.getObjectsUnderPoint(stage.mouseX, stage.mouseY)
+  /* console.log(states)
+  console.log('x: ' + stage.mouseX + ' y: ' + stage.mouseY)
+  console.log(state) */
   states.some((x) => {
     if (x.name === 'state') {
-      hanging = false
+      state = x
       return
     }
   })
-  transformation.graphics.clear()
-    .ss(2).s(hanging ? '#f00' : '#0f0')
-    .mt(0, 0).lt(stage.mouseX - transformation.x, stage.mouseY - transformation.y)
+  return state
+}
+
+function drawLine(e) {
+  var current = findState()
+  if (current) {
+    transformation.graphics.clear()
+      .ss(2).s('#0f0')
+      .mt(0, 0).lt(current.x - transformation.x, current.y - transformation.y)
+  } else {
+    hanging = true
+    transformation.graphics.clear()
+      .ss(2).s('#f00')
+      .mt(0, 0).lt(stage.mouseX - transformation.x, stage.mouseY - transformation.y)
+  }
 }
 
 function linkState(e) {
-  var state = stage.getObjectUnderPoint(stage.mouseX, stage.mouseY)
-  console.log(state)
-  if (state != null) {
+  var current = findState()
+  console.log(current)
+  if (current != null) {
     transformation.graphics.clear()
       .ss(2)
       .s('#000')
-      .mt(0, 0).lt(state.x - transformation.x, state.y, transformation.y)
+      .mt(0, 0).lt(current.x - transformation.x, current.y - transformation.y)
   } else {
     stage.removeChild(transformation)
   }
-  stage.off('stagemousemove', drawLine)
-  stage.off('stagemouseup', linkState)
+  // console.log(stage.off('stagemousemove', drawLine))
+  // console.log(stage.off('stagemouseup', linkState))
+  stage.removeEventListener('stagemousemove', drawLine)
+  stage.removeEventListener('stagemouseup', linkState)
 }
 
 function handler(e) {
   if (e.nativeEvent.button === 2) {
     el = stage.getObjectUnderPoint(stage.mouseX, stage.mouseY)
+
     transformation = new createjs.Shape().set({
-      x: el.x,
-      y: el.y,
+      x: el ? el.x : stage.mouseX,
+      y: el ? el.y : stage.mouseY,
       mouseEnabled: false,
       graphics: new createjs.Graphics().s('#00f').dc(0, 0, 50)
     })
     stage.addChild(transformation)
-    stage.on('stagemousemove', drawLine)
-    stage.on('stagemouseup', linkState)
+    stage.addEventListener('stagemousemove', drawLine)
+    stage.addEventListener('stagemouseup', linkState)
   } else if (stage.getObjectUnderPoint(stage.mouseX, stage.mouseY) == null) {
     createState(e)
   }
@@ -101,7 +119,8 @@ function handler(e) {
 stage.on('stagemousedown', handler)
 
 function tick(event) {
-  stage.update();
+  console.log(stage.hasEventListener('stagemousemove'))
+  stage.update()
 }
 
 // update size of canvas on window resize
