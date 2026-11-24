@@ -7,4 +7,5 @@ Tiny web app to make drawing state diagrams easy. Wanted to test my knowledge us
 This repo also holds the first hardware and design work for an AI-hosted party-game device.
 
 - [`docs/product-brief.md`](docs/product-brief.md): research, hardware plan, game modes, pricing.
+- [`party/index.html`](party/index.html): playable phone-hosted prototype of the games.
 - [`hardware/enclosure`](hardware/enclosure): printable donut enclosure (STL + STEP) and its parametric source.

@@ -225,12 +225,41 @@ The device and the deck are the same games. The deck can ship months earlier and
   small goal. Sell direct and on TikTok Shop mid-year to build proof. Pitch Urban Outfitters
   and Spencer's for holiday 2027, Target for 2028.
 
-## 7. Open questions
+## 7. The account
 
-1. **Which account is it?** Searches on the transcribed name ("SGPT" / "RGPT") found
-   nothing. A Rohan Kumar, formerly of MrBeast's short-form team and now at Night Media,
-   turned up, but no link to an AI character was found. The handle is needed to size the audience.
-2. **The "it girl one-liners on street photography" account with a Target game** was not
-   identified either.
-3. **Who pays for cloud hours** after the box is opened?
-4. **Deck first, or device first?**
+[@ahh.gpt](https://www.instagram.com/ahh.gpt) on Instagram. The character, played by Sam Wassef, is a
+chatbot in a human body: hollow phrasing, abrupt pivots, confident wrong answers, verbal
+tics such as "Ah! Gotcha", "Definitively" and "Absolutely", and a lot of water drunk on camera.
+
+| When | Followers | Source |
+|---|---|---|
+| July 2026 | 111K, seven posts, 24M views | [Rachel Karten on X](https://x.com/milkkarten/status/2074570523108110650) |
+| September 2026 | about 724K, 183M impressions in 12 months | [Socialpruf](https://socialpruf.com/instagram/ahh.gpt) (third-party estimate) |
+| Recent | 999K "in less than six months" | [press summary of a WIRED report](https://finance.biggo.com/news/2f84a81a-663f-4ffd-8fbe-1df21578a398) |
+
+The same report says talent agencies are signing creators who mock AI. Follower counts
+come from trackers and press, not from Instagram directly. No public source connects the
+account to Rohan or to a film; that part rests on what the team has said.
+
+What this means for the product:
+
+- Growth is steep and recent, so the launch window matters more than polish.
+- The water bit is the account's signature. The prototype scores in glasses of water and
+  uses a draining glass as its timer.
+- Roughly 1M followers at 0.1–0.5% is 1,000–5,000 launch units *(estimate)*.
+
+## 8. Decision: deck first
+
+Decided 2026-11-24. Ship the card deck and a phone-hosted version of the games before the device.
+
+[`party/index.html`](../party/index.html) is the first playable version: one phone in the
+middle of the table acts as the host. It has two roast games, a forehead guessing game and
+two connection games, runs entirely in the browser, and costs nothing per hour of play.
+The host's lines are scripted; there is no AI judging yet.
+
+## 9. Open questions
+
+1. **The "it girl one-liners on street photography" account with a Target game** was not identified.
+2. **Who pays for cloud hours** once AI judging and the device arrive?
+3. **Does the account's team want the host written in their character's voice?** The
+   prototype uses generic chatbot-speak, not their scripts.

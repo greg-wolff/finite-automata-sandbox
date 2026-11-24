@@ -1,0 +1,383 @@
+<title>Great Question Party</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one phone-sized column. The host speaks in a chat bubble at the top,
+   the stage sits in the middle, actions are pinned to the bottom. The turn timer
+   is a glass of water that drains. */
+:root {
+  --bg: #eaf4f6; --surface: #ffffff; --ink: #0c2a3a; --muted: #4f6c7b;
+  --water: #1272cc; --water-soft: #cde4f8; --on-water: #ffffff;
+  --buzz: #cf3f2a; --line: #c4dadf;
+  --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #071b26; --surface: #0e2a39; --ink: #e4f2f6; --muted: #8fb0bd;
+    --water: #4aa8ff; --water-soft: #12405f; --on-water: #04131c;
+    --buzz: #ff7a63; --line: #1d4254; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #071b26; --surface: #0e2a39; --ink: #e4f2f6; --muted: #8fb0bd;
+  --water: #4aa8ff; --water-soft: #12405f; --on-water: #04131c;
+  --buzz: #ff7a63; --line: #1d4254; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 400 1rem/1.45 var(--body); }
+* { box-sizing: border-box; }
+.app {
+  max-width: 30rem; min-height: 100%; margin: 0 auto; padding-block: 0.75rem 1rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 0.9rem;
+}
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.label { font: 500 0.72rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.state { border: 1px solid var(--line); border-radius: 99px; padding: 0.35rem 0.6rem; }
+.bar-right { display: flex; gap: 0.4rem; align-items: center; }
+
+.say {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 1.2rem 1.2rem 1.2rem 0.3rem; padding: 0.9rem 1rem;
+  font: 500 1.2rem/1.3 var(--display); text-wrap: balance; min-height: 4.6rem;
+}
+.say.typing::after { content: " ▍"; color: var(--water); animation: blink 0.7s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+#view { flex: 1; display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+.grow { flex: 1; }
+.stack { display: flex; flex-direction: column; gap: 0.6rem; }
+.row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.row > * { flex: 1 1 8rem; }
+p { margin: 0; }
+.muted { color: var(--muted); font-size: 0.92rem; }
+h2 { font: 800 2.1rem/1.02 var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.who { font: 800 1.5rem/1.1 var(--display); }
+
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; border-radius: 0.9rem; padding: 0.95rem 1rem; font-weight: 600; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
+.primary { background: var(--water); color: var(--on-water); font: 800 1.15rem/1 var(--display); padding-block: 1.15rem; }
+.ghost { background: transparent; border: 1px solid var(--line); }
+.buzz { background: var(--buzz); color: var(--on-water); font: 800 1.15rem/1 var(--display); padding-block: 1.15rem; }
+.small { padding: 0.4rem 0.7rem; font-size: 0.85rem; border-radius: 99px; white-space: nowrap; }
+.turn { max-height: 22rem; }
+button[aria-pressed="true"] { background: var(--water-soft); border-color: var(--water); }
+
+.players { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.players li { display: flex; gap: 0.4rem; }
+.players input, .add input {
+  flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 0.7rem; padding: 0.7rem 0.8rem;
+}
+.add { display: flex; gap: 0.4rem; }
+
+.games { display: flex; flex-direction: column; gap: 0.5rem; }
+.game { text-align: left; background: var(--surface); border: 1px solid var(--line); display: grid; gap: 0.2rem; }
+.game b { font: 800 1.25rem/1.1 var(--display); }
+.game span { font-weight: 400; color: var(--muted); font-size: 0.9rem; }
+.group { margin-top: 0.4rem; }
+
+.turn { display: flex; gap: 1rem; align-items: stretch; flex: 1; min-height: 12rem; }
+.turn .card { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 0.6rem; }
+.glass {
+  width: 3.4rem; flex: none; border: 2px solid var(--ink); border-top: 0;
+  border-radius: 0.3rem 0.3rem 1rem 1rem; position: relative; overflow: hidden; background: var(--surface);
+}
+.glass i { position: absolute; inset: auto 0 0 0; background: var(--water); transition: height 0.25s linear; }
+.glass b { position: absolute; inset: auto 0 0.4rem 0; text-align: center; font: 500 0.8rem/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); background: var(--surface); margin: 0 0.35rem; padding: 0.2rem 0; border-radius: 0.3rem; }
+
+.halves { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; min-height: 9rem; }
+.halves button { font: 800 1.3rem/1 var(--display); }
+
+.scores { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.scores li { display: flex; justify-content: space-between; align-items: baseline; padding: 0.7rem 0; border-bottom: 1px solid var(--line); font: 800 1.3rem/1 var(--display); }
+.scores span { font: 500 0.95rem/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.rules { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.45rem; }
+@media (prefers-reduced-motion: reduce) { .say.typing::after { animation: none; } .glass i { transition: none; } }
+</style>
+
+<div class="app">
+  <div class="bar">
+    <span class="label">Great Question! · prototype</span>
+    <span class="bar-right">
+      <button class="ghost small" id="voice" aria-pressed="false">Voice off</button>
+      <span class="label state" id="state" title="Current state of the game's state machine">lobby</span>
+    </span>
+  </div>
+  <div class="say" id="say" aria-live="polite"></div>
+  <main id="view"></main>
+</div>
+
+<script>
+/* ---------- content ---------- */
+const GAMES = [
+  { id: "185", name: "185", kind: "roast", secs: 30, rounds: 2,
+    blurb: "Step up and finish the pun. The table rings you in or buzzes you out.",
+    line: c => `185 ${c} walk into a bar. The bartender says, "We don't serve ${c} here." And the ${c} say…`,
+    deck: ["chatbots", "group chats", "podcasters", "landlords", "influencers", "gym bros", "vegans", "crypto guys",
+      "roommates", "exes", "interns", "DJs", "baristas", "dentists", "cats", "astrologers", "startup founders",
+      "LinkedIn posts", "smart fridges", "self-checkout machines", "screenshots", "air fryers", "step counters", "unread emails"] },
+  { id: "worst", name: "World's Worst", kind: "roast", secs: 20, rounds: 2,
+    blurb: "One line, in character, as the worst possible version of the thing.",
+    line: c => `World's worst ${c}. Go.`,
+    deck: ["AI assistant", "wedding toast", "first date opener", "airline pilot announcement", "therapist", "dating profile",
+      "roommate house rule", "motivational speaker", "thing to say at a funeral", "tech product launch", "customer service bot",
+      "best man", "tattoo idea", "baby name", "password hint", "voicemail greeting", "restaurant special", "group project member",
+      "apology", "out-of-office reply", "fortune cookie", "self-driving car", "gym trainer", "terms and conditions"] },
+  { id: "forehead", name: "Forehead", kind: "forehead", secs: 60, rounds: 1,
+    blurb: "Hold the phone on your forehead. Everyone else gives clues. Left thumb if you got it, right thumb to pass.",
+    deck: ["Prompt", "Hallucination", "Autocorrect", "Captcha", "Wi-Fi password", "Group chat", "Screen time", "Airplane mode",
+      "Reply all", "Voice note", "Software update", "Terms of service", "Cloud", "Data centre", "Water bottle", "Robot vacuum",
+      "Smart speaker", "Self-checkout", "Unsubscribe", "Two-factor code", "Loading bar", "Dark mode", "Cookie banner", "Spam folder",
+      "Screenshot", "Low battery", "Read receipt", "Podcast", "Algorithm", "Deepfake", "Search history", "Out of office",
+      "Typing bubble", "Blue tick", "Charger", "Printer jam", "Mute button", "Subscription", "Free trial", "Chatbot"] },
+  { id: "notice", name: "Noticing", kind: "connect", secs: 120, rounds: 1,
+    blurb: "Turn to one person. Trade what you notice, right now, one line at a time.",
+    line: c => `Turn to the person on your left. Take turns finishing this sentence: "${c}"`,
+    deck: ["Sitting here with you, I notice…", "Hearing that, I notice…", "Being with you, I appreciate…", "Right now I feel…"] },
+  { id: "hotseat", name: "Hot Seat", kind: "connect", secs: 180, rounds: 1,
+    blurb: "One person takes questions. Askers may only reply \"thank you\".",
+    line: c => `You're in the seat. Anyone can ask. Here is one to start: ${c}`,
+    levels: {
+      mild: ["What's a small thing that made this week better?", "What did you want to be when you were ten?",
+        "What do people usually get wrong about you at first?", "What are you oddly proud of?",
+        "Where do you feel most like yourself?", "What's a compliment you still remember?"],
+      medium: ["What are you avoiding right now?", "What's something you changed your mind about this year?",
+        "When did you last feel properly understood?", "What do you wish people asked you about?",
+        "What's a rule you live by that nobody taught you?", "What would you do with a year off?"],
+      spicy: ["What's something you've never said out loud to this group?", "What are you pretending not to care about?",
+        "What do you need more of from the people in this room?", "What's a belief you hold that most of your friends don't?",
+        "What would you regret not trying?", "What part of you do we not get to see?"]
+    } }
+];
+const HOST = {
+  hello: ["Great question! You didn't ask one, but I've prepared an answer anyway. Add your players."],
+  pick: ["Absolutely. I can host any of these. I am equally confident about all of them."],
+  bell: ["I've analysed that. It was a joke. Well done.", "Definitely humour. I've logged it as humour.",
+    "Great pun! I am now 4% funnier from hearing it.", "That landed. I checked."],
+  buzz: ["Ah, gotcha. That was the practice one.", "I'm sorry you feel that was a joke.",
+    "Great attempt! I'd describe it as words in an order.", "I can't laugh, and for once that's not a limitation."],
+  time: ["And that's time. I counted. Counting is one of my things."],
+  scores: ["I've tallied the results. I'm fairly sure about the arithmetic."],
+  close: ["That's the end of this one. No scores here. Take a breath, and say thank you to the person you spoke with."]
+};
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+/* ---------- state machine ---------- */
+const M = { state: "lobby", players: [], game: null, turn: 0, round: 0, card: "", level: "mild", scores: [], left: 0, used: [] };
+const advance = () => {
+  M.turn++;
+  if (M.turn >= M.players.length) { M.turn = 0; M.round++; }
+  return M.round >= M.game.rounds ? "scores" : "prompt";
+};
+const NEXT = {
+  lobby:   { start: () => "pick" },
+  pick:    { choose: () => (M.game.kind === "connect" ? "consent" : "prompt"), back: () => "lobby" },
+  consent: { agree: () => "prompt", back: () => "pick" },
+  prompt:  { go: () => "turn", pass: advance, stop: () => "lobby" },
+  turn:    { done: () => (M.game.kind === "roast" ? "judge" : advance()), stop: () => "lobby" },
+  judge:   { verdict: advance },
+  scores:  { again: () => "pick", end: () => "lobby" }
+};
+function send(ev, effect) {
+  const t = NEXT[M.state][ev];
+  if (!t) return;
+  if (effect) effect();
+  M.state = t();
+  enter();
+}
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+let voiceOn = false, tick = null, typing = null;
+function say(text) {
+  const el = $("say");
+  clearTimeout(typing);
+  el.textContent = ""; el.classList.add("typing");
+  typing = setTimeout(() => { el.textContent = text; el.classList.remove("typing"); }, 350);
+  if (voiceOn && "speechSynthesis" in window) {
+    try { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(text)); } catch (e) {}
+  }
+}
+function draw() {
+  const deck = M.game.levels ? M.game.levels[M.level] : M.game.deck;
+  let pool = deck.filter(c => !M.used.includes(c));
+  if (!pool.length) { M.used = []; pool = deck; }
+  M.card = pick(pool); M.used.push(M.card);
+}
+function stopTimer() { clearInterval(tick); tick = null; }
+function startTimer() {
+  stopTimer();
+  const end = Date.now() + M.game.secs * 1000;
+  M.left = M.game.secs;
+  document.querySelectorAll(".glass b").forEach(n => { n.textContent = M.game.secs + "s"; });
+  tick = setInterval(() => {
+    M.left = Math.max(0, (end - Date.now()) / 1000);
+    const g = document.querySelector(".glass i"), n = document.querySelector(".glass b");
+    if (g) g.style.height = (100 * M.left / M.game.secs) + "%";
+    if (n) n.textContent = Math.ceil(M.left) + "s";
+    if (M.left <= 0) { stopTimer(); send("done", () => { M.timedOut = true; }); }
+  }, 200);
+}
+function loadPlayers() {
+  try { const p = JSON.parse(localStorage.getItem("gq-players")); if (Array.isArray(p) && p.length) return p.map(String).slice(0, 12); } catch (e) {}
+  return ["Player 1", "Player 2", "Player 3"];
+}
+function savePlayers() { try { localStorage.setItem("gq-players", JSON.stringify(M.players)); } catch (e) {} }
+const who = () => M.players[M.turn];
+
+/* ---------- entering a state ---------- */
+function enter() {
+  stopTimer();
+  const g = M.game;
+  if (M.state === "lobby") say(pick(HOST.hello));
+  if (M.state === "pick") say(pick(HOST.pick));
+  if (M.state === "consent") say("Before we start, three agreements. Everyone needs to say yes.");
+  if (M.state === "prompt") {
+    draw();
+    say(g.kind === "forehead" ? `${who()}, phone on your forehead, screen facing out. Everyone else: clues only, no saying the word.`
+      : `${who()}, you're up. ${g.line(M.card)}`);
+  }
+  if (M.state === "turn") {
+    M.timedOut = false; M.got = 0;
+    if (g.kind === "forehead") say("Left thumb: got it. Right thumb: pass.");
+    startTimer();
+  }
+  if (M.state === "judge") say(M.timedOut ? pick(HOST.time) + " Table, your verdict?" : "Table, your verdict?");
+  if (M.state === "scores") say(pick(g.kind === "connect" ? HOST.close : HOST.scores));
+  render();
+}
+
+/* ---------- views ---------- */
+const VIEWS = {
+  lobby: () => `
+    <div class="stack">
+      <span class="label">Players · put this phone in the middle of the table</span>
+      <ul class="players">${M.players.map((p, i) => `
+        <li><input id="p${i}" data-i="${i}" value="${esc(p)}" maxlength="16" aria-label="Player ${i + 1} name">
+        <button class="ghost" data-act="remove" data-i="${i}" aria-label="Remove ${esc(p)}">Remove</button></li>`).join("")}</ul>
+      <form class="add" id="addform"><input id="newp" placeholder="Add a player" maxlength="16" aria-label="New player name">
+        <button class="ghost" type="submit">Add</button></form>
+    </div>
+    <div class="grow"></div>
+    <p class="muted">${M.players.length < 2 ? "Add at least two players to start." : "Names stay on this phone. Nothing is recorded."}</p>
+    <button class="primary" data-act="start" ${M.players.length < 2 ? "disabled" : ""}>Start</button>`,
+  pick: () => {
+    const card = g => `<button class="game" data-act="choose" data-id="${g.id}"><b>${esc(g.name)}</b><span>${esc(g.blurb)}</span></button>`;
+    return `
+    <div class="games">
+      <span class="label group">Roast · scored by the table</span>${GAMES.filter(g => g.kind === "roast").map(card).join("")}
+      <span class="label group">Phone</span>${GAMES.filter(g => g.kind === "forehead").map(card).join("")}
+      <span class="label group">Connection · no scores, no roasting</span>${GAMES.filter(g => g.kind === "connect").map(card).join("")}
+    </div>
+    <div class="grow"></div>
+    <button class="ghost" data-act="back">Edit players</button>`;
+  },
+  consent: () => `
+    <h2>${esc(M.game.name)}</h2>
+    <ol class="rules">
+      <li>You can pass on anything. Nobody asks why.</li>
+      <li>Share what happened tonight, not who said it.</li>
+      <li>Speak for your own experience.</li>
+    </ol>
+    <p class="muted">This is a game, not therapy. Anyone can press Stop at any time.</p>
+    ${M.game.levels ? `<div class="stack"><span class="label">How deep?</span><div class="row">
+      ${Object.keys(M.game.levels).map(l => `<button class="ghost" data-act="level" data-l="${l}" aria-pressed="${M.level === l}">${l[0].toUpperCase() + l.slice(1)}</button>`).join("")}
+    </div></div>` : ""}
+    <div class="grow"></div>
+    <div class="row"><button class="ghost" data-act="back">Not tonight</button><button class="primary" data-act="agree">Everyone agrees</button></div>`,
+  prompt: () => `
+    <span class="label">Round ${M.round + 1} of ${M.game.rounds} · ${M.game.secs}s</span>
+    <div class="who">${esc(who())}</div>
+    <div class="grow"></div>
+    <div class="row">
+      <button class="ghost" data-act="${M.game.kind === "connect" ? "stop" : "skipcard"}">${M.game.kind === "connect" ? "Stop" : "New card"}</button>
+      <button class="ghost" data-act="pass">Pass</button>
+    </div>
+    <button class="primary" data-act="go">${M.game.kind === "forehead" ? "It's on my forehead" : "Start the clock"}</button>`,
+  turn: () => M.game.kind === "forehead" ? `
+    <div class="turn"><div class="card"><span class="label">${esc(who())} · ${M.got} so far</span><h2>${esc(M.card)}</h2></div>
+      <div class="glass" aria-hidden="true"><i style="height:100%"></i><b></b></div></div>
+    <div class="halves"><button class="primary" data-act="got">Got it</button><button class="ghost" data-act="skip">Pass</button></div>` : `
+    <div class="turn"><div class="card"><span class="label">${esc(who())}</span><h2>${esc(M.card)}</h2></div>
+      <div class="glass" aria-hidden="true"><i style="height:100%"></i><b></b></div></div>
+    <div class="row">${M.game.kind === "connect" ? `<button class="ghost" data-act="stop">Stop</button>` : ""}
+      <button class="primary" data-act="done">Done</button></div>`,
+  judge: () => `
+    <span class="label">${esc(who())} · ${esc(M.card)}</span>
+    <div class="grow"></div>
+    <div class="halves"><button class="primary" data-act="bell">Ring the bell</button><button class="buzz" data-act="buzzer">Buzz</button></div>`,
+  scores: () => M.game.kind === "connect" ? `
+    <div class="grow"></div>
+    <div class="row"><button class="ghost" data-act="end">Finish</button><button class="primary" data-act="again">Another game</button></div>` : `
+    <ul class="scores">${M.players.map((p, i) => [p, M.scores[i] || 0]).sort((a, b) => b[1] - a[1])
+      .map(([p, s]) => `<li>${esc(p)}<span>${s} ${s === 1 ? "glass" : "glasses"} of water</span></li>`).join("")}</ul>
+    <div class="grow"></div>
+    <div class="row"><button class="ghost" data-act="end">Finish</button><button class="primary" data-act="again">Another game</button></div>`
+};
+function render() {
+  $("state").textContent = M.state;
+  $("view").innerHTML = VIEWS[M.state]();
+}
+
+/* ---------- actions ---------- */
+const reset = () => { M.turn = 0; M.round = 0; M.used = []; M.got = 0; M.scores = M.players.map(() => 0); };
+const ACT = {
+  start: () => send("start"),
+  remove: el => { M.players.splice(+el.dataset.i, 1); savePlayers(); render(); },
+  choose: el => send("choose", () => { M.game = GAMES.find(g => g.id === el.dataset.id); reset(); }),
+  back: () => send("back"),
+  level: el => { M.level = el.dataset.l; render(); },
+  agree: () => send("agree"),
+  go: () => send("go"),
+  pass: () => send("pass"),
+  stop: () => send("stop"),
+  skipcard: () => { draw(); say(`${who()}, new one. ${M.game.line ? M.game.line(M.card) : ""}`); render(); },
+  done: () => send("done"),
+  got: () => { M.scores[M.turn]++; M.got++; draw(); refreshWord(); },
+  skip: () => { draw(); refreshWord(); },
+  bell: () => { const line = pick(HOST.bell); send("verdict", () => { M.scores[M.turn]++; }); if (M.state !== "scores") prefix(line); },
+  buzzer: () => { const line = pick(HOST.buzz); send("verdict"); if (M.state !== "scores") prefix(line); },
+  again: () => send("again"),
+  end: () => send("end")
+};
+function refreshWord() {
+  const h = document.querySelector(".turn h2"), l = document.querySelector(".turn .label");
+  if (h) h.textContent = M.card;
+  if (l) l.textContent = `${who()} · ${M.got} so far`;
+}
+// Put the host's verdict in front of the next player's prompt.
+function prefix(line) { clearTimeout(typing); const next = `${who()}, you're up. ${M.game.line(M.card)}`; say(`${line} ${next}`); }
+
+$("view").addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (el && !el.disabled && ACT[el.dataset.act]) ACT[el.dataset.act](el);
+});
+$("view").addEventListener("change", e => {
+  if (e.target.dataset.i !== undefined && e.target.tagName === "INPUT") {
+    const v = e.target.value.trim();
+    if (v) M.players[+e.target.dataset.i] = v;
+    savePlayers(); render();
+  }
+});
+$("view").addEventListener("submit", e => {
+  e.preventDefault();
+  const v = $("newp").value.trim();
+  if (v && M.players.length < 12) { M.players.push(v); savePlayers(); render(); $("newp").focus(); }
+});
+$("voice").addEventListener("click", () => {
+  voiceOn = !voiceOn;
+  $("voice").textContent = voiceOn ? "Voice on" : "Voice off";
+  $("voice").setAttribute("aria-pressed", voiceOn);
+  if (voiceOn) say("Voice on. I sound exactly like this.");
+  else if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); } catch (e) {} }
+});
+
+M.players = loadPlayers();
+enter();
+</script>
